@@ -7,43 +7,46 @@ esp32:
   framework:
     type: arduino
 
-# VARIABLES
-# ${modbus_controller_id}
-# ${tx_pin}
-# ${rx_pin}
+# FIXME  Try Anchors and Aliases from here: https://spacelift.io/blog/yaml$0
+# Thanks to this thread!  https://github.com/softwarecrash/Solar2MQTT/discussions/209
+# and this thread:  https://www.reddit.com/r/Esphome/comments/198lze3/looking_for_guidance_how_to_set_up_multiple/$0
+# and this: https://devices.esphome.io/devices/Narada-NPFC$0
 
 substitutions:
   tx_pin: GPIO10
   rx_pin: GPIO9
-  device_suffix: ""
+  id_suffix: ""
   name_suffix: ""
-  modbus_id: modbus_${device_suffix}
-  uart_id: uart_${device_suffix}
-  modbus_controller_id: modbus_controller_${device_suffix}
+  modbus_id: modbus_id${id_suffix}
+  uart_id: uart${id_suffix}
+  modbus_controller_id: modbus_controller${id_suffix}
+  update_seconds: "1s"
+  write_skip: "60"
 
 uart:
-  - id: ${uart_id}
+  - id: uart_id${id_suffix}
     baud_rate: 9600
     tx_pin: ${tx_pin}
     rx_pin: ${rx_pin}
 
 modbus:
-  - id: ${modbus_id}
-    uart_id: ${uart_id}
+  - id: modbus_id${id_suffix}
+    uart_id: uart_id${id_suffix}
 
 modbus_controller:
-  - id: ${modbus_controller_id}    
+  - id: modbus_controller_id${id_suffix}
     address: 0x01
-    modbus_id: ${modbus_id}
+    modbus_id: modbus_id${id_suffix}
     setup_priority: -10
     offline_skip_updates: 60
-    update_interval: 2s
+    update_interval: ${update_seconds}
+
 
 text_sensor:
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Working Mode${name_suffix}"
-    id: Working_Mode${device_suffix}
+    id: Working_Mode${id_suffix}
     address: 201
     entity_category: diagnostic
     register_type: holding
@@ -62,15 +65,15 @@ text_sensor:
         default: return std::string(x);
       } return x;  
 
-#Series NO. ASC address 186 registers 12 Read
+#FIXME  Series NO. ASC address 186 registers 12 Read
 
 
 sensor:
   
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Mains Voltage${name_suffix}"
-    id: Mains_Voltage${device_suffix}
+    id: Mains_Voltage${id_suffix}
     address: 202
     register_type: holding
     value_type: S_WORD
@@ -82,9 +85,9 @@ sensor:
       - multiply: 0.1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Mains Frequency${name_suffix}"
-    id: Mains_Frequency${device_suffix}
+    id: Mains_Frequency${id_suffix}
     address: 203
     register_type: holding
     value_type: S_WORD
@@ -96,9 +99,9 @@ sensor:
       - multiply: 0.01
   
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Mains Power${name_suffix}"
-    id: Mains_Power${device_suffix}
+    id: Mains_Power${id_suffix}
     address: 204
     register_type: holding
     value_type: S_WORD
@@ -107,23 +110,23 @@ sensor:
     unit_of_measurement: "W"
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Voltage${name_suffix}"
-    id: Inverter_Voltage${device_suffix}
+    id: Inverter_Voltage${id_suffix}
     address: 205
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: voltage
     unit_of_measurement: "V"
-    accuracy_decimals: 0
+    accuracy_decimals: 1
     filters:
       - multiply: 0.1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Current${name_suffix}"
-    id: Inverter_Current${device_suffix}
+    id: Inverter_Current${id_suffix}
     address: 206
     register_type: holding
     value_type: S_WORD
@@ -135,23 +138,23 @@ sensor:
       - multiply: 0.1   
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Frequency${name_suffix}"
-    id: Inverter_Frequency${device_suffix}
+    id: Inverter_Frequency${id_suffix}
     address: 207
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: frequency
     unit_of_measurement: "Hz"
-    accuracy_decimals: 0
+    accuracy_decimals: 1
     filters:
       - multiply: 0.01
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Power${name_suffix}"
-    id: Inverter_Power${device_suffix}
+    id: Inverter_Power${id_suffix}
     address: 208
     register_type: holding
     value_type: S_WORD
@@ -161,9 +164,9 @@ sensor:
     accuracy_decimals: 0
  
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Charging Power${name_suffix}"
-    id: Inverter_Charging_Power${device_suffix}
+    id: Inverter_Charging_Power${id_suffix}
     address: 209
     register_type: holding
     value_type: S_WORD
@@ -173,23 +176,23 @@ sensor:
     accuracy_decimals: 0
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Voltage${name_suffix}"
-    id: Output_Voltage${device_suffix}
+    id: Output_Voltage${id_suffix}
     address: 210
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: voltage
     unit_of_measurement: "V"
-    accuracy_decimals: 0
+    accuracy_decimals: 1
     filters:
       - multiply: 0.1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Current${name_suffix}"
-    id: Output_Current${device_suffix}
+    id: Output_Current${id_suffix}
     address: 211
     register_type: holding
     value_type: S_WORD
@@ -201,23 +204,23 @@ sensor:
       - multiply: 0.1   
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Frequency${name_suffix}"
-    id: Output_Frequency${device_suffix}
+    id: Output_Frequency${id_suffix}
     address: 212
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: frequency
     unit_of_measurement: "Hz"
-    accuracy_decimals: 0
+    accuracy_decimals: 1
     filters:
       - multiply: 0.01
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Active Power${name_suffix}"
-    id: Output_Active_Power${device_suffix}
+    id: Output_Active_Power${id_suffix}
     address: 213
     register_type: holding
     value_type: S_WORD
@@ -229,9 +232,9 @@ sensor:
       - multiply: 1 
     
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Apparent Power${name_suffix}"
-    id: Output_Apparent_Power${device_suffix}
+    id: Output_Apparent_Power${id_suffix}
     address: 214
     register_type: holding
     value_type: S_WORD
@@ -243,9 +246,9 @@ sensor:
       - multiply: 1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Voltage${name_suffix}"
-    id: Battery_Voltage${device_suffix}
+    id: Battery_Voltage${id_suffix}
     address: 215
     register_type: holding
     value_type: S_WORD
@@ -257,9 +260,9 @@ sensor:
       - multiply: 0.1    
       
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Current${name_suffix}"
-    id: Battery_Current${device_suffix}
+    id: Battery_Current${id_suffix}
     address: 216
     register_type: holding
     value_type: S_WORD
@@ -271,22 +274,22 @@ sensor:
       - multiply: 0.1  
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Power${name_suffix}"
-    id: Battery_Power${device_suffix}
+    id: Battery_Power${id_suffix}
     address: 217
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: power
     unit_of_measurement: "W"
-    accuracy_decimals: 1
+    accuracy_decimals: 0
     register_count: 2          # address 218 Internal Command
      
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Voltage${name_suffix}"
-    id: PV_Voltage${device_suffix}
+    id: PV_Voltage${id_suffix}
     address: 219
     register_type: holding
     value_type: S_WORD
@@ -298,9 +301,9 @@ sensor:
       - multiply: 0.1 
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Current${name_suffix}"
-    id: PV_Current${device_suffix}
+    id: PV_Current${id_suffix}
     address: 220
     register_type: holding
     value_type: S_WORD
@@ -313,9 +316,9 @@ sensor:
     register_count: 3     # 221-222 Reserved
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Power${name_suffix}"
-    id: PV_Power${device_suffix}
+    id: PV_Power${id_suffix}
     address: 223
     register_type: holding
     value_type: S_WORD
@@ -325,9 +328,9 @@ sensor:
     accuracy_decimals: 0
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Charging Power${name_suffix}"
-    id: PV_Charging_Power${device_suffix}
+    id: PV_Charging_Power${id_suffix}
     address: 224
     register_type: holding
     value_type: S_WORD
@@ -337,34 +340,33 @@ sensor:
     accuracy_decimals: 0
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Load${name_suffix}"
-    id: Inverter_Load_Percentage${device_suffix}
+    id: Inverter_Load_Percentage${id_suffix}
     address: 225
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     #device_class: battery
     unit_of_measurement: "%"
-    accuracy_decimals: 1
+    accuracy_decimals: 0
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Temperature DC-DC${name_suffix}"
-    id: Temperature_DCDC${device_suffix}
+    id: Temperature_DCDC${id_suffix}
     address: 226
     register_type: holding
     value_type: S_WORD
     state_class: measurement
     device_class: temperature
     unit_of_measurement: "°C"
-    accuracy_decimals: 0 
-    #register_count: 1 #was there, unneeded?
-
+    accuracy_decimals: 1 
+  
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Temperature Inverter${name_suffix}"
-    id: Temperature_Inverter${device_suffix}
+    id: Temperature_Inverter${id_suffix}
     address: 227
     register_type: holding
     value_type: S_WORD
@@ -375,9 +377,9 @@ sensor:
     register_count: 2     # 228 Reserved
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Percentage${name_suffix}"
-    id: Battery_Percentage${device_suffix}
+    id: Battery_Percentage${id_suffix}
     address: 229
     register_type: holding
     value_type: U_WORD
@@ -388,9 +390,9 @@ sensor:
     register_count: 3     # 230 Internal, 231 Reserved
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Current 232${name_suffix}"
-    id: Battery_Current_ID_232${device_suffix}
+    id: Battery_Current_ID_232${id_suffix}
     address: 232
     register_type: holding
     value_type: S_WORD
@@ -402,9 +404,9 @@ sensor:
       - multiply: 0.1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Inverter Charging Current${name_suffix}"
-    id: Inverter_Charging_Current${device_suffix}
+    id: Inverter_Charging_Current${id_suffix}
     address: 233
     register_type: holding
     value_type: S_WORD
@@ -416,9 +418,9 @@ sensor:
       - multiply: 0.1 
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Charging Current${name_suffix}"
-    id: PV_Charging_Current${device_suffix}
+    id: PV_Charging_Current${id_suffix}
     address: 234
     register_type: holding
     value_type: S_WORD
@@ -435,15 +437,15 @@ sensor:
 select:
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Fault Code${name_suffix}"
-    id: Fault_Code${device_suffix}
+    id: Fault_Code${id_suffix}
     entity_category: config
     address: 100
     register_count: 2
     use_write_multiple: true
     value_type: U_DWORD
-    optionsmap:
+    optionsmap:            #FIXME it's a BITMASK!!!
       "None": 0
       "Over temperature of inverter module":  1
       "Over temperature of DCDC module": 2
@@ -475,15 +477,15 @@ select:
   # could replate above "register_count: 2" with 8 to cover gap 103-107
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Warning Code${name_suffix}"
-    id: Warning_Code${device_suffix}
+    id: Warning_Code${id_suffix}
     entity_category: config
     address: 108
     register_count: 2
     use_write_multiple: true
     value_type: U_DWORD
-    optionsmap:
+    optionsmap:           #FIXME it's a BITMASK!!!
       "None": 0
       "Mains waveform abnormal": 1
       "Mains low voltage": 3 
@@ -504,12 +506,13 @@ select:
       "Battery voltage difference of parallel system is too large": 18
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Mode${name_suffix}"
-    id: Output_Mode${device_suffix}
+    id: Output_Mode${id_suffix}
     entity_category: config
     address: 300
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Single": 0
@@ -519,12 +522,13 @@ select:
       "3 Phase P3": 4
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Priority${name_suffix}"
-    id: Output_Priority${device_suffix}
+    id: Output_Priority${id_suffix}
     entity_category: config
     address: 301
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Utility-Only": 0
@@ -533,24 +537,26 @@ select:
       "PV-Utility-Battery" : 3
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Input Voltage Range${name_suffix}"
-    id: Input_Voltage_Range${device_suffix}
+    id: Input_Voltage_Range${id_suffix}
     entity_category: config
     address: 302
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Wide range": 0
       "Narrow range": 1 
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Buzzer Mode${name_suffix}"
-    id: Buzzer_Mode${device_suffix}
+    id: Buzzer_Mode${id_suffix}
     entity_category: config
     address: 303
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Mute all": 0
@@ -560,12 +566,13 @@ select:
     register_count: 2     # 304 Reserved, 305... is switch, below
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Charging Priority${name_suffix}"
-    id: Battery_Charging_Priority${device_suffix}
+    id: Battery_Charging_Priority${id_suffix}
     entity_category: config
     address: 331
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Utility priority": 0
@@ -574,12 +581,13 @@ select:
       "Only PV charging": 3
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Remote Turn On Mode${name_suffix}"
-    id: Remote_Turn_On_Mode${device_suffix}
+    id: Remote_Turn_On_Mode${id_suffix}
     entity_category: config
     address: 406
     value_type: U_WORD
+    skip_updates: ${write_skip}
     use_write_multiple: true
     optionsmap:
       "Locally or remotely": 0
@@ -590,10 +598,11 @@ select:
 number:
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Recovery Voltage (to Battery) in SBU Mode${name_suffix}"
-    id: Battery_Recovery_Voltage${device_suffix}
+    id: Battery_Recovery_Voltage${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "V"
     device_class: voltage
@@ -605,10 +614,11 @@ number:
     multiply: 10
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Protection Voltage (to Mains) in SBU mode${name_suffix}"
-    id: Battery_Protection_Voltage${device_suffix}
+    id: Battery_Protection_Voltage${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "V"
     device_class: voltage
@@ -621,10 +631,11 @@ number:
     # register_count: 2     # 328 Reserved
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Low Cutoff Voltage in Off-Grid Mode${name_suffix}"
-    id: Battery_Cutoff_Voltage${device_suffix}
+    id: Battery_Cutoff_Voltage${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "V"
     device_class: voltage
@@ -638,10 +649,11 @@ number:
   #331 in options
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Maximum Total Charging Current${name_suffix}"
-    id: Battery_Max_Total_Charging_Current${device_suffix}
+    id: Battery_Max_Total_Charging_Current${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "A"
     device_class: current
@@ -653,12 +665,13 @@ number:
     multiply: 10
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
-    id: Battery_Mains_Total_Charging_Current${device_suffix}
+    modbus_controller_id: modbus_controller_id${id_suffix}
+    id: Battery_Mains_Total_Charging_Current${id_suffix}
     name: "Battery Maximum Mains Charging Current${name_suffix}"
     entity_category: config
     unit_of_measurement: "A"
     device_class: current
+    skip_updates: ${write_skip}
     use_write_multiple: true
     address: 333
     value_type: U_WORD
@@ -667,13 +680,14 @@ number:
     max_value: 80
     multiply: 10
 
-#EQ Settings
+#EQ Settings FIXME complete these
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Equalization Voltage${name_suffix}"
-    id: Battery_Equalization_Voltage${device_suffix}
+    id: Battery_Equalization_Voltage${id_suffix}
     address: 334
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "V"
     device_class: voltage
@@ -683,7 +697,7 @@ number:
     step: 0.1
     multiply: 10
 # Eq Charging voltage 0.1V Uint 334 1 R/W
-# bat_eq_time min Uint 335 1 R/W Range: 0~900
+# bat_eq_time min Uint 335 1 R/W Range: 0~900 FIXME
 # Eq Timeout exit min Uint 336 1 R/W Range: 0~900 time
 # Two Eq charging intervals day Uint 337 1 R/W Range:1~90
 # Reserve 338 1 Reserve address
@@ -691,10 +705,11 @@ number:
 # Use these if battery is connected and communicating with inverter #
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Protection SOC (to Mains) in SBU Mode${name_suffix}"
-    id: Battery_Protection_SOC${device_suffix}
+    id: Battery_Protection_SOC${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "%"
     device_class: battery
@@ -705,10 +720,11 @@ number:
     step: 1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Recovery SOC (to Battery) in SBU Mode${name_suffix}"
-    id: Battery_Recovery_SOC${device_suffix}
+    id: Battery_Recovery_SOC${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "%"
     device_class: battery
@@ -719,10 +735,11 @@ number:
     step: 1
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Low Cutoff SOC in Off-grid Mode${name_suffix}"
-    id: Battery_Cutoff_SOC${device_suffix}
+    id: Battery_Cutoff_SOC${id_suffix}
     entity_category: config
+    skip_updates: ${write_skip}
     use_write_multiple: true
     unit_of_measurement: "%"
     device_class: battery
@@ -736,19 +753,21 @@ number:
 switch:
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "LCD Backlight${name_suffix}"
-    id: LCD_Backlight${device_suffix}
+    id: LCD_Backlight${id_suffix}
     register_type: holding
     entity_category: config
     bitmask: 1
     address: 305
+    skip_updates: ${write_skip}
     use_write_multiple: true
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "LCD Return to First Screen${name_suffix}"
-    id: LCD_Return${device_suffix}
+    id: LCD_Return${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     register_type: holding
     entity_category: config
@@ -756,9 +775,10 @@ switch:
     address: 306
     
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Power-saving Mode${name_suffix}"
-    id: Power_Saving_Mode${device_suffix}
+    id: Power_Saving_Mode${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     register_type: holding
     entity_category: config
@@ -766,9 +786,10 @@ switch:
     address: 307
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Overload Automatic Restart${name_suffix}"
-    id: Overload_Automatic_Restart${device_suffix}
+    id: Overload_Automatic_Restart${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     register_type: holding
     entity_category: config
@@ -776,9 +797,10 @@ switch:
     address: 308
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Overtemperature Automatic Restart${name_suffix}"
-    id: Overtemperature_Automatic_Restart${device_suffix}
+    id: Overtemperature_Automatic_Restart${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     register_type: holding
     entity_category: config
@@ -786,9 +808,10 @@ switch:
     address: 309
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Overload Transfer to Bypass${name_suffix}"
-    id: Overload_Automatic_Bypass${device_suffix}
+    id: Overload_Automatic_Bypass${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     register_type: holding
     entity_category: config
@@ -796,9 +819,10 @@ switch:
     address: 310
 
   - platform: modbus_controller
-    modbus_controller_id: ${modbus_controller_id}
+    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Remote Power Switch${name_suffix}"
-    id: Remote_Power_Switch${device_suffix}
+    id: Remote_Power_Switch${id_suffix}
+    skip_updates: ${write_skip}
     use_write_multiple: true
     address: 420
     register_type: holding
