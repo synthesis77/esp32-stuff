@@ -3,7 +3,7 @@ esphome:
   friendly_name: Inverter POWMR
 
 esp32:
-  board: esp32dev
+  board: esp32-c3-devkitm-1
   framework:
     type: arduino
 
@@ -483,6 +483,7 @@ switch:
     address: 420
     register_type: holding
     entity_category: config
+    bitmask: 1
     icon: "mdi:toggle-switch"  
     
   - platform: modbus_controller
@@ -490,6 +491,7 @@ switch:
     name: "LCD backlight"
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 305
     use_write_multiple: true
 
@@ -499,6 +501,7 @@ switch:
     use_write_multiple: true
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 306
     
   - platform: modbus_controller
@@ -507,6 +510,7 @@ switch:
     use_write_multiple: true
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 307
 
   - platform: modbus_controller
@@ -515,6 +519,7 @@ switch:
     use_write_multiple: true
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 308
 
   - platform: modbus_controller
@@ -523,6 +528,7 @@ switch:
     use_write_multiple: true
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 309
 
   - platform: modbus_controller
@@ -531,4 +537,5 @@ switch:
     use_write_multiple: true
     register_type: holding
     entity_category: config
+    bitmask: 1
     address: 310
