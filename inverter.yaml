@@ -63,7 +63,7 @@ text_sensor:
     address: 201
     entity_category: diagnostic
     register_type: holding
-    response_size: 1
+    response_size: 2
     raw_encode: HEXBYTES
     lambda: |-
       uint16_t value = modbus_controller::word_from_hex_str(x, 0);
@@ -293,6 +293,17 @@ sensor:
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
+    name: "Inverter load"
+    id: Load_Percentage
+    address: 225
+    register_type: holding
+    value_type: U_WORD
+    state_class: measurement
+    unit_of_measurement: "%"
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
     name: "DC-DC Temperature"
     id: DCDC_Temperature
     address: 226
@@ -300,7 +311,7 @@ sensor:
     value_type: U_WORD
     state_class: measurement
     unit_of_measurement: "°C"
-    accuracy_decimals: 1 
+    accuracy_decimals: 0 
     register_count: 1
 
   - platform: modbus_controller
@@ -489,3 +500,27 @@ switch:
     register_type: holding
     entity_category: config
     address: 307
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Overload automatic restart"
+    use_write_multiple: true
+    register_type: holding
+    entity_category: config
+    address: 308
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Overtemperature automatic restart"
+    use_write_multiple: true
+    register_type: holding
+    entity_category: config
+    address: 309
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Overload transfer to bypass"
+    use_write_multiple: true
+    register_type: holding
+    entity_category: config
+    address: 310
