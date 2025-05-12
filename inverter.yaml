@@ -72,6 +72,7 @@ text_sensor:
       } return x;  
 
 sensor:
+
   - platform: uptime
     name: "Uptime"
     entity_category: "diagnostic"
@@ -101,6 +102,19 @@ sensor:
     name: "Mains Frequency"
     id: Mains_Frequency
     address: 203
+    register_type: holding
+    value_type: S_WORD
+    state_class: measurement
+    unit_of_measurement: "Hz"
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.01
+  
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Inverter Frequency"
+    id: Inverter_Frequency
+    address: 207
     register_type: holding
     value_type: S_WORD
     state_class: measurement
@@ -399,6 +413,37 @@ select:
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
+    name: "Warning code"
+    entity_category: config
+    address: 108
+    register_count: 2
+    use_write_multiple: true
+    value_type: U_DWORD
+    optionsmap:
+      "None": 0
+      "Mains waveform abnormal": 1
+      "Mains low voltage": 3 
+      "Mains over frequency": 4
+      "Mains low frequency": 5
+      "PV low voltage": 6
+      "Over temperature": 7
+      "Battery low voltage": 8
+      "Battery is not connected": 9
+      "Overload": 10
+      "Battery Eq charging": 11
+      "Battery is discharged at a low voltage and it has not been charged back to the recovery point": 12
+      "Output power derating": 13
+      "Fan blocked": 14
+      "PV energy is too low to be use": 15
+      "Parallel communication interrupted": 16
+      "Output mode of Single and Parallel systems is inconsistent": 17
+      "Battery voltage difference of parallel system is too large": 18
+      
+
+
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
     name: "Input voltage range "
     entity_category: config
     address: 302
@@ -447,6 +492,96 @@ select:
       "Only remote": 2
 
 number:
+
+# Use these if battery is not communicating with inverter #
+# BLOCK START
+
+#  - platform: modbus_controller
+#    modbus_controller_id: smg_inverter
+#    name: "Battery discharge recovery point in Mains mode"
+#    entity_category: config
+#    use_write_multiple: true
+#    unit_of_measurement: "V"
+#    device_class: current
+#    address: 326
+#    value_type: U_WORD
+#    min_value: 40
+#    max_value: 54
+#    step: 0.1
+#    multiply: 10
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: smg_inverter
+#    name: "Battery low voltage protection point in Mains mode"
+#    entity_category: config
+#    use_write_multiple: true
+#    unit_of_measurement: "V"
+#    device_class: current
+#    address: 327
+#    value_type: U_WORD
+#    min_value: 40
+#    max_value: 54
+#    step: 0.1
+#    multiply: 10
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: smg_inverter
+#    name: "Battery low voltage protection point in Off-Grid mode"
+#    entity_category: config
+#    use_write_multiple: true
+#    unit_of_measurement: "V"
+#    device_class: current
+#    address: 329
+#    value_type: U_WORD
+#    min_value: 40
+#    max_value: 54
+#    step: 0.1
+#    multiply: 10
+#
+#
+# Use these if battery is connected and communicating with inverter #
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Mains mode battery discharge SOC protection value"
+    entity_category: config
+    use_write_multiple: true
+    unit_of_measurement: "%"
+    device_class: current
+    address: 341
+    value_type: U_WORD
+    min_value: 5
+    max_value: 50
+    step: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Mains mode battery discharge SOC recovery value"
+    entity_category: config
+    use_write_multiple: true
+    unit_of_measurement: "%"
+    device_class: current
+    address: 342
+    value_type: U_WORD
+    min_value: 60
+    max_value: 100
+    step: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "Battery discharge SOC protection value in off-grid mode"
+    entity_category: config
+    use_write_multiple: true
+    unit_of_measurement: "%"
+    device_class: current
+    address: 343
+    value_type: U_WORD
+    min_value: 3
+    max_value: 30 ### !!! Must be lower then "Mains mode battery discharge SOC protection value"
+    step: 1
+
+# EOF BLOCK
+
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Maximum charging current"
@@ -457,7 +592,7 @@ number:
     address: 332
     value_type: U_WORD
     min_value: 0
-    max_value: 80
+    max_value: 120
     step: 1
     multiply: 10
 
@@ -472,7 +607,7 @@ number:
     value_type: U_WORD
     step: 1
     min_value: 0
-    max_value: 50
+    max_value: 80
     multiply: 10
 
 switch:
