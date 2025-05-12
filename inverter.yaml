@@ -291,6 +291,17 @@ sensor:
     accuracy_decimals: 1 
     register_count: 3 
 
+  - platform: modbus_controller
+    modbus_controller_id: smg_inverter
+    name: "DC-DC Temperature"
+    id: DCDC_Temperature
+    address: 226
+    register_type: holding
+    value_type: U_WORD
+    state_class: measurement
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1 
+    register_count: 1
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
@@ -300,9 +311,9 @@ sensor:
     register_type: holding
     value_type: U_WORD
     state_class: measurement
-    unit_of_measurement: "℃"
+    unit_of_measurement: "°C"
     accuracy_decimals: 1 
-    register_count: 2
+    register_count: 1
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
@@ -323,7 +334,7 @@ select:
     entity_category: config
     address: 301
     value_type: U_WORD
-    use_write_multiple: True
+    use_write_multiple: true
     optionsmap:
       "Utility-PV-Battery": 0
       "PV-Utility-Battery": 1
@@ -335,7 +346,7 @@ select:
     entity_category: config
     address: 100
     register_count: 2
-    use_write_multiple: True
+    use_write_multiple: true
     value_type: U_DWORD
     optionsmap:
       "None": 0
@@ -373,7 +384,7 @@ select:
     entity_category: config
     address: 302
     value_type: U_WORD
-    use_write_multiple: True
+    use_write_multiple: true
     optionsmap:
       "Wide range": 0
       "Narrow range": 1 
@@ -384,8 +395,7 @@ select:
     entity_category: config
     address: 303
     value_type: U_WORD
-    register_count: 2
-    use_write_multiple: True
+    use_write_multiple: true
     optionsmap:
       "Mute all": 0
       "Beep source": 1
@@ -398,7 +408,7 @@ select:
     entity_category: config
     address: 331
     value_type: U_WORD
-    use_write_multiple: True
+    use_write_multiple: true
     optionsmap:
       "Utility priority": 0
       "PV priority": 1
@@ -411,8 +421,7 @@ select:
     entity_category: config
     address: 406
     value_type: U_WORD
-    register_count: 14
-    use_write_multiple: True
+    use_write_multiple: true
     optionsmap:
       "locally or remotely": 0
       "Only local": 1
@@ -423,29 +432,35 @@ number:
     modbus_controller_id: smg_inverter
     name: "Maximum charging current"
     entity_category: config
-    use_write_multiple: True
+    use_write_multiple: true
+    unit_of_measurement: "A"
+    device_class: current
     address: 332
     value_type: U_WORD
     min_value: 0
-    max_value: 800
-    step: 10
+    max_value: 80
+    step: 1
+    multiply: 10
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Maximum mains charging current"
     entity_category: config
-    use_write_multiple: True
+    unit_of_measurement: "A"
+    device_class: current
+    use_write_multiple: true
     address: 333
     value_type: U_WORD
-    step: 10
+    step: 1
     min_value: 0
-    max_value: 500
+    max_value: 50
+    multiply: 10
 
 switch:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Remote switch"
-    use_write_multiple: True
+    use_write_multiple: true
     address: 420
     register_type: holding
     entity_category: config
@@ -462,7 +477,7 @@ switch:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "LCD return"
-    use_write_multiple: True
+    use_write_multiple: true
     register_type: holding
     entity_category: config
     address: 306
@@ -470,7 +485,7 @@ switch:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Energy-saving mode"
-    use_write_multiple: True
+    use_write_multiple: true
     register_type: holding
     entity_category: config
     address: 307
