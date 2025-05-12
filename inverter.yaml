@@ -1,43 +1,48 @@
+substitutions:
+  device_name: "powmr-inverter"
+  node_name: "PowMr Inverter"
+
 esphome:
-  name: inverter-powmr
-  friendly_name: Inverter POWMR
+  name: "powmr-inverter"
+  friendly_name: "PowMr Inverter"
+  platformio_options:
+    board_build.flash_mode: dio
 
-esp8266:
-  board: d1_mini
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
 
- 
-# Enable Home Assistant API
 api:
   encryption:
-    key: "secret"
+    key: "apikey was here"
 
 ota:
   - platform: esphome
-    password: "secret"
+    password: "password was here"
 
 wifi:
-  networks:
-  - ssid: secret
-    password: secret
-  - ssid: secret
-    password: secret
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
+    # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "secret"
-    password: "secret"
+    ssid: "Powmr-Inverter Fallback Hotspot"
+    password: "wifi password was here"
 
 captive_portal:
+
 
 logger:
   level: DEBUG
   baud_rate: 0
 
+
 uart:
   - id: uart_inverter
     baud_rate: 9600
-    tx_pin: GPIO1
-    rx_pin: GPIO3
+    tx_pin: YOUR TX PIN HERE
+    rx_pin: YOUR RX PIN HERE
 
 modbus:
   - id: modbus_inverter
@@ -49,8 +54,7 @@ modbus_controller:
     modbus_id: modbus_inverter
     setup_priority: -10
     offline_skip_updates: 60
-    update_interval: 1s
-
+    update_interval: 2s
 text_sensor:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
@@ -75,6 +79,16 @@ text_sensor:
       } return x;  
 
 sensor:
+  - platform: uptime
+    name: "Uptime"
+    entity_category: "diagnostic"
+    device_class: duration
+    update_interval: 60s
+  - platform: wifi_signal
+    name: "RSSI"
+    id: wifi_rssi
+    entity_category: "diagnostic"
+    update_interval: 60s
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Effective mains voltage"
@@ -309,6 +323,7 @@ select:
     entity_category: config
     address: 301
     value_type: U_WORD
+    use_write_multiple: True
     optionsmap:
       "Utility-PV-Battery": 0
       "PV-Utility-Battery": 1
@@ -320,8 +335,10 @@ select:
     entity_category: config
     address: 100
     register_count: 2
+    use_write_multiple: True
     value_type: U_DWORD
     optionsmap:
+      "None": 0
       "Over temperature of inverter module":  1
       "Over temperature of DCDC module": 2
       "Battery over voltage": 3
@@ -356,6 +373,7 @@ select:
     entity_category: config
     address: 302
     value_type: U_WORD
+    use_write_multiple: True
     optionsmap:
       "Wide range": 0
       "Narrow range": 1 
@@ -367,6 +385,7 @@ select:
     address: 303
     value_type: U_WORD
     register_count: 2
+    use_write_multiple: True
     optionsmap:
       "Mute all": 0
       "Beep source": 1
@@ -379,6 +398,7 @@ select:
     entity_category: config
     address: 331
     value_type: U_WORD
+    use_write_multiple: True
     optionsmap:
       "Utility priority": 0
       "PV priority": 1
@@ -392,6 +412,7 @@ select:
     address: 406
     value_type: U_WORD
     register_count: 14
+    use_write_multiple: True
     optionsmap:
       "locally or remotely": 0
       "Only local": 1
@@ -402,6 +423,7 @@ number:
     modbus_controller_id: smg_inverter
     name: "Maximum charging current"
     entity_category: config
+    use_write_multiple: True
     address: 332
     value_type: U_WORD
     min_value: 0
@@ -412,6 +434,7 @@ number:
     modbus_controller_id: smg_inverter
     name: "Maximum mains charging current"
     entity_category: config
+    use_write_multiple: True
     address: 333
     value_type: U_WORD
     step: 10
@@ -422,6 +445,7 @@ switch:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Remote switch"
+    use_write_multiple: True
     address: 420
     register_type: holding
     entity_category: config
@@ -433,10 +457,12 @@ switch:
     register_type: holding
     entity_category: config
     address: 305
+    use_write_multiple: true
 
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "LCD return"
+    use_write_multiple: True
     register_type: holding
     entity_category: config
     address: 306
@@ -444,6 +470,7 @@ switch:
   - platform: modbus_controller
     modbus_controller_id: smg_inverter
     name: "Energy-saving mode"
+    use_write_multiple: True
     register_type: holding
     entity_category: config
     address: 307
