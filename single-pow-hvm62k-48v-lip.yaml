@@ -50,13 +50,13 @@ modbus_controller:
   - platform: modbus_controller
     modbus_controller_id: modbus_controller_id${id_suffix}
     id: _need_to_override_this
-    register_type: holding
 
 .modbus_sensor: &modbus_sensor
   - <<: *modbus_entity
     value_type: S_WORD
     state_class: measurement
-    accuracy_decimals: 0 
+    register_type: holding
+    accuracy_decimals: 0
 
 .modbus_volts: &modbus_volts
   - <<: *modbus_sensor
@@ -101,12 +101,20 @@ modbus_controller:
     unit_of_measurement: "°C"
     accuracy_decimals: 1 
 
-.modbus_switch: &modbus_switch
+.modbus_writable: &modbus_writable
   - <<: *modbus_entity
     entity_category: config
-    bitmask: 1
     use_write_multiple: true
     skip_updates: ${write_skip}
+
+.modbus_switch: &modbus_switch
+  - <<: *modbus_writable
+    register_type: holding
+    bitmask: 1
+
+.modbus_select: &modbus_select
+  - <<: *modbus_writable
+    value_type: U_WORD
 
 
 text_sensor:
@@ -290,15 +298,11 @@ sensor:
 
 select:
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Fault Code${name_suffix}"
     id: Fault_Code${id_suffix}
-    entity_category: config
     address: 100
     register_count: 2
-    use_write_multiple: true
-    value_type: U_DWORD
     optionsmap:            #FIXME it's a BITMASK!!!
       "None": 0
       "Over temperature of inverter module":  1
@@ -330,15 +334,11 @@ select:
       "Parallel versions are incompatible": 27 
   # could replate above "register_count: 2" with 8 to cover gap 103-107
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Warning Code${name_suffix}"
     id: Warning_Code${id_suffix}
-    entity_category: config
     address: 108
     register_count: 2
-    use_write_multiple: true
-    value_type: U_DWORD
     optionsmap:           #FIXME it's a BITMASK!!!
       "None": 0
       "Mains waveform abnormal": 1
@@ -359,15 +359,10 @@ select:
       "Output mode of Single and Parallel systems is inconsistent": 17
       "Battery voltage difference of parallel system is too large": 18
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Output Mode${name_suffix}"
     id: Output_Mode${id_suffix}
-    entity_category: config
     address: 300
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Single": 0
       "Parallel": 1
@@ -375,43 +370,28 @@ select:
       "3 Phase P2": 3
       "3 Phase P3": 4
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Output Priority${name_suffix}"
     id: Output_Priority${id_suffix}
-    entity_category: config
     address: 301
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Utility-Only": 0
       "PV-Only": 1
       "PV-Battery-Utility": 2
       "PV-Utility-Battery" : 3
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Input Voltage Range${name_suffix}"
     id: Input_Voltage_Range${id_suffix}
-    entity_category: config
     address: 302
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Wide range": 0
       "Narrow range": 1 
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Buzzer Mode${name_suffix}"
     id: Buzzer_Mode${id_suffix}
-    entity_category: config
     address: 303
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Mute all": 0
       "Beep source": 1
@@ -419,30 +399,20 @@ select:
       "Beep fault": 3
     register_count: 2     # 304 Reserved, 305... is switch, below
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Battery Charging Priority${name_suffix}"
     id: Battery_Charging_Priority${id_suffix}
-    entity_category: config
     address: 331
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Utility priority": 0
       "PV priority": 1
       "PV and Utility": 2
       "Only PV charging": 3
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_select
     name: "Remote Turn On Mode${name_suffix}"
     id: Remote_Turn_On_Mode${id_suffix}
-    entity_category: config
     address: 406
-    value_type: U_WORD
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     optionsmap:
       "Locally or remotely": 0
       "Only local": 1
