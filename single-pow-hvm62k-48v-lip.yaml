@@ -64,7 +64,7 @@ modbus_controller:
     unit_of_measurement: "V"
     accuracy_decimals: 1
     filters:
-      - multiply: 0.1 
+      - multiply: 0.1
 
 .modbus_amps: &modbus_amps
   - <<: *modbus_sensor
@@ -72,7 +72,7 @@ modbus_controller:
     unit_of_measurement: "A"
     accuracy_decimals: 1
     filters:
-      - multiply: 0.1 
+      - multiply: 0.1
 
 .modbus_watts: &modbus_watts
   - <<: *modbus_sensor
@@ -99,7 +99,7 @@ modbus_controller:
   - <<: *modbus_sensor
     device_class: temperature
     unit_of_measurement: "°C"
-    accuracy_decimals: 1 
+    accuracy_decimals: 1
 
 .modbus_writable: &modbus_writable
   - <<: *modbus_entity
@@ -112,26 +112,29 @@ modbus_controller:
     register_type: holding
     bitmask: 1
 
-.modbus_select: &modbus_select
+.modbus_number: &modbus_number
   - <<: *modbus_writable
     value_type: U_WORD
 
+.modbus_select: &modbus_select
+  - <<: *modbus_number
+
 .modbus_number_volts: &modbus_number_volts
-  - <<: *modbus_writable
+  - <<: *modbus_number
     device_class: voltage
     unit_of_measurement: "V"
     step: 0.1
     multiply: 10
 
 .modbus_number_amps: &modbus_number_amps
-  - <<: *modbus_writable
+  - <<: *modbus_number
     device_class: current
     unit_of_measurement: "A"
     step: 1
     multiply: 10
 
 .modbus_number_percent: &modbus_number_percent
-  - <<: *modbus_writable
+  - <<: *modbus_number
     device_class: battery
     unit_of_measurement: "%"
     step: 1
@@ -330,10 +333,10 @@ select:
       "Battery over voltage": 3
       "Over temperature of PV module": 4
       "Output short circuited": 5
-      "Over Inverter voltage": 6 
+      "Over Inverter voltage": 6
       "Output over load": 7
       "Bus over voltage": 8
-      "Bus soft start times out": 9 
+      "Bus soft start times out": 9
       "PV over current": 10
       "PV over voltage": 11
       "Battery over current": 12
@@ -342,16 +345,16 @@ select:
       "Reserve": 15
       "Inverter DC component is too high": 16
       "Reserve2": 17
-      "The zero bias of Output current is too large": 18 
-      "The zero bias of inverter current is too large": 19 
-      "The zero bias of battery current is too large": 20 
-      "The zero bias of PV current is too large": 21 
+      "The zero bias of Output current is too large": 18
+      "The zero bias of inverter current is too large": 19
+      "The zero bias of battery current is too large": 20
+      "The zero bias of PV current is too large": 21
       "Inverter low voltage": 22
       "Inverter negative power protection": 23
-      "The host in the parallel system is lost": 24 
-      "Synchronization signal abnormal in the parallel system": 25 
+      "The host in the parallel system is lost": 24
+      "Synchronization signal abnormal in the parallel system": 25
       "The battery type is incompatible": 26
-      "Parallel versions are incompatible": 27 
+      "Parallel versions are incompatible": 27
   # could replate above "register_count: 2" with 8 to cover gap 103-107
 
   - <<: *modbus_select
@@ -362,7 +365,7 @@ select:
     optionsmap:           #FIXME it's a BITMASK!!!
       "None": 0
       "Mains waveform abnormal": 1
-      "Mains low voltage": 3 
+      "Mains low voltage": 3
       "Mains over frequency": 4
       "Mains low frequency": 5
       "PV low voltage": 6
@@ -394,7 +397,7 @@ select:
     name: "Output Priority${name_suffix}"
     id: Output_Priority${id_suffix}
     address: 301
-    optionsmap:
+    optionsmap:  #FIXME manual has SOL, Uti, Sbu, Sub in that order
       "Utility-Only": 0
       "PV-Only": 1
       "PV-Battery-Utility": 2
@@ -404,9 +407,9 @@ select:
     name: "Input Voltage Range${name_suffix}"
     id: Input_Voltage_Range${id_suffix}
     address: 302
-    optionsmap:
+    optionsmap:  #FIXME manual has APL, UPS, GNt
       "Wide range": 0
-      "Narrow range": 1 
+      "Narrow range": 1
 
   - <<: *modbus_select
     name: "Buzzer Mode${name_suffix}"
@@ -442,18 +445,60 @@ select:
 number:
 
   - <<: *modbus_number_volts
+    name: "Output Voltage Setting${name_suffix}"
+    id: Output_Voltage_Setting${id_suffix}
+    address: 320
+    min_value: 220
+    max_value: 240
+    step: 10
+
+  - <<: *modbus_number
+    name: "Output Frequency Setting${name_suffix}"
+    id: Output_Frequency_Setting${id_suffix}
+    address: 321
+    device_class: frequency
+    unit_of_measurement: "Hz"
+    min_value: 50
+    max_value: 60
+    step: 10
+    multiply: 100
+
+#Reserve 322 1 Reserve address
+
+  - <<: *modbus_number_volts
+    name: "Battery Overvoltage Protection Point${name_suffix}"
+    id: Battery_Protection_Overvoltage${id_suffix}
+    address: 323
+#    min_value: 40 #FIXME
+#    max_value: 54
+
+  - <<: *modbus_number_volts
+    name: "Battery Bulk Charging Voltage${name_suffix}"
+    id: Battery_Bulk_Charging_Voltage${id_suffix}
+    address: 324
+    min_value: 48
+    max_value: 62
+    
+  - <<: *modbus_number_volts
+    name: "Battery Float Charging Voltage${name_suffix}"
+    id: Battery_Float_Charging_Voltage${id_suffix}
+    address: 325
+    min_value: 48
+    max_value: 62
+
+  - <<: *modbus_number_volts
     name: "Battery Recovery Voltage (to Battery) in SBU Mode${name_suffix}"
     id: Battery_Recovery_Voltage${id_suffix}
     address: 326
-    min_value: 40 #FIXME
-    max_value: 54
+    min_value: 48 #FIXME (what is "FULL" setting?)
+    max_value: 62
 
   - <<: *modbus_number_volts
     name: "Battery Protection Voltage (to Mains) in SBU mode${name_suffix}"
     id: Battery_Protection_Voltage${id_suffix}
     address: 327
-    min_value: 40
-    max_value: 54 #FIXME
+    min_value: 44
+    max_value: 55 #FIXME manual says up to 57.2?
     # register_count: 2     # 328 Reserved
 
   - <<: *modbus_number_volts
@@ -461,7 +506,7 @@ number:
     id: Battery_Cutoff_Voltage${id_suffix}
     address: 329
     min_value: 40
-    max_value: 54 #FIXME
+    max_value: 54
     # register_count: 2     # 330 Reserved
   #331 in options
 
@@ -470,27 +515,54 @@ number:
     id: Battery_Max_Total_Charging_Current${id_suffix}
     entity_category: config
     address: 332
-    min_value: 0 #FIXME
-    max_value: 120
+    min_value: 10
+    max_value: 120  #FIXME manual says 80??
+    step: 10
 
   - <<: *modbus_number_amps
     id: Battery_Mains_Total_Charging_Current${id_suffix}
     name: "Battery Maximum Mains Charging Current${name_suffix}"
     address: 333
-    min_value: 0
+    min_value: 0  #FIXME min is 2, then 10,20,...80
     max_value: 80
+    step: 10
 
-#EQ Settings FIXME complete these
   - <<: *modbus_number_volts
     name: "Battery Equalization Voltage${name_suffix}"
     id: Battery_Equalization_Voltage${id_suffix}
     address: 334
-    min_value: 40
-    max_value: 54 #FIXME
-# Eq Charging voltage 0.1V Uint 334 1 R/W
-# bat_eq_time min Uint 335 1 R/W Range: 0~900 FIXME
-# Eq Timeout exit min Uint 336 1 R/W Range: 0~900 time
-# Two Eq charging intervals day Uint 337 1 R/W Range:1~90
+    min_value: 48
+    max_value: 64
+
+  - <<: *modbus_number
+    name: "Battery Equalization Time${name_suffix}"
+    id: Battery_Equalization_Time${id_suffix}
+    address: 335
+    device_class: duration
+    unit_of_measurement: "min"
+    min_value: 0
+    max_value: 900
+    step: 5
+
+  - <<: *modbus_number
+    name: "Battery Equalization Timeout${name_suffix}"
+    id: Battery_Equalization_Timeout${id_suffix}
+    address: 336
+    device_class: duration
+    unit_of_measurement: "min"
+    min_value: 0
+    max_value: 900
+    step: 5
+
+  - <<: *modbus_number
+    name: "Battery Equalization Interval${name_suffix}"
+    id: Battery_Equalization_Interval${id_suffix}
+    address: 321
+    device_class: duration
+    unit_of_measurement: "d"
+    min_value: 1
+    max_value: 90
+
 # Reserve 338 1 Reserve address
 
 # Use these if battery is connected and communicating with inverter #
