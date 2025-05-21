@@ -46,11 +46,14 @@ modbus_controller:
 
 # needs random . before name
 # https://community.home-assistant.io/t/how-do-i-label-and-use-anchors/812692/6$0
-.modbus_sensor: &modbus_sensor
+.modbus_entity: &modbus_entity
   - platform: modbus_controller
     modbus_controller_id: modbus_controller_id${id_suffix}
     id: _need_to_override_this
     register_type: holding
+
+.modbus_sensor: &modbus_sensor
+  - <<: *modbus_entity
     value_type: S_WORD
     state_class: measurement
     accuracy_decimals: 0 
@@ -97,6 +100,13 @@ modbus_controller:
     device_class: temperature
     unit_of_measurement: "°C"
     accuracy_decimals: 1 
+
+.modbus_switch: &modbus_switch
+  - <<: *modbus_entity
+    entity_category: config
+    bitmask: 1
+    use_write_multiple: true
+    skip_updates: ${write_skip}
 
 
 text_sensor:
@@ -596,81 +606,39 @@ number:
 
 switch:
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "LCD Backlight${name_suffix}"
     id: LCD_Backlight${id_suffix}
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 305
-    skip_updates: ${write_skip}
-    use_write_multiple: true
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "LCD Return to First Screen${name_suffix}"
     id: LCD_Return${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 306
     
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "Power-saving Mode${name_suffix}"
     id: Power_Saving_Mode${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 307
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "Overload Automatic Restart${name_suffix}"
     id: Overload_Automatic_Restart${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 308
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "Overtemperature Automatic Restart${name_suffix}"
     id: Overtemperature_Automatic_Restart${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 309
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "Overload Transfer to Bypass${name_suffix}"
     id: Overload_Automatic_Bypass${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    register_type: holding
-    entity_category: config
-    bitmask: 1
     address: 310
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_switch
     name: "Remote Power Switch${name_suffix}"
     id: Remote_Power_Switch${id_suffix}
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     address: 420
-    register_type: holding
-    entity_category: config
-    bitmask: 1
-    icon: "mdi:toggle-switch"  
+    icon: "mdi:toggle-switch"
     
