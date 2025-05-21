@@ -116,6 +116,26 @@ modbus_controller:
   - <<: *modbus_writable
     value_type: U_WORD
 
+.modbus_number_volts: &modbus_number_volts
+  - <<: *modbus_writable
+    device_class: voltage
+    unit_of_measurement: "V"
+    step: 0.1
+    multiply: 10
+
+.modbus_number_amps: &modbus_number_amps
+  - <<: *modbus_writable
+    device_class: current
+    unit_of_measurement: "A"
+    step: 1
+    multiply: 10
+
+.modbus_number_percent: &modbus_number_percent
+  - <<: *modbus_writable
+    device_class: battery
+    unit_of_measurement: "%"
+    step: 1
+
 
 text_sensor:
   - platform: modbus_controller
@@ -421,105 +441,52 @@ select:
 
 number:
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_volts
     name: "Battery Recovery Voltage (to Battery) in SBU Mode${name_suffix}"
     id: Battery_Recovery_Voltage${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "V"
-    device_class: voltage
     address: 326
-    value_type: U_WORD
     min_value: 40 #FIXME
     max_value: 54
-    step: 0.1
-    multiply: 10
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_volts
     name: "Battery Protection Voltage (to Mains) in SBU mode${name_suffix}"
     id: Battery_Protection_Voltage${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "V"
-    device_class: voltage
     address: 327
-    value_type: U_WORD
     min_value: 40
     max_value: 54 #FIXME
-    step: 0.1
-    multiply: 10
     # register_count: 2     # 328 Reserved
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_volts
     name: "Battery Low Cutoff Voltage in Off-Grid Mode${name_suffix}"
     id: Battery_Cutoff_Voltage${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "V"
-    device_class: voltage
     address: 329
-    value_type: U_WORD
     min_value: 40
     max_value: 54 #FIXME
-    step: 0.1
-    multiply: 10
     # register_count: 2     # 330 Reserved
   #331 in options
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_amps
     name: "Battery Maximum Total Charging Current${name_suffix}"
     id: Battery_Max_Total_Charging_Current${id_suffix}
     entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "A"
-    device_class: current
     address: 332
-    value_type: U_WORD
     min_value: 0 #FIXME
     max_value: 120
-    step: 1
-    multiply: 10
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_amps
     id: Battery_Mains_Total_Charging_Current${id_suffix}
     name: "Battery Maximum Mains Charging Current${name_suffix}"
-    entity_category: config
-    unit_of_measurement: "A"
-    device_class: current
-    skip_updates: ${write_skip}
-    use_write_multiple: true
     address: 333
-    value_type: U_WORD
-    step: 1
     min_value: 0
     max_value: 80
-    multiply: 10
 
 #EQ Settings FIXME complete these
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_volts
     name: "Battery Equalization Voltage${name_suffix}"
     id: Battery_Equalization_Voltage${id_suffix}
     address: 334
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "V"
-    device_class: voltage
-    value_type: U_WORD
     min_value: 40
     max_value: 54 #FIXME
-    step: 0.1
-    multiply: 10
 # Eq Charging voltage 0.1V Uint 334 1 R/W
 # bat_eq_time min Uint 335 1 R/W Range: 0~900 FIXME
 # Eq Timeout exit min Uint 336 1 R/W Range: 0~900 time
@@ -528,50 +495,26 @@ number:
 
 # Use these if battery is connected and communicating with inverter #
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_percent
     name: "Battery Protection SOC (to Mains) in SBU Mode${name_suffix}"
     id: Battery_Protection_SOC${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "%"
-    device_class: battery
     address: 341
-    value_type: U_WORD
     min_value: 5
     max_value: 50
-    step: 1
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_percent
     name: "Battery Recovery SOC (to Battery) in SBU Mode${name_suffix}"
     id: Battery_Recovery_SOC${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "%"
-    device_class: battery
     address: 342
-    value_type: U_WORD
     min_value: 60
     max_value: 100
-    step: 1
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_number_percent
     name: "Battery Low Cutoff SOC in Off-grid Mode${name_suffix}"
     id: Battery_Cutoff_SOC${id_suffix}
-    entity_category: config
-    skip_updates: ${write_skip}
-    use_write_multiple: true
-    unit_of_measurement: "%"
-    device_class: battery
     address: 343
-    value_type: U_WORD
     min_value: 3
     max_value: 30 ### !!! Must be lower then "Mains mode battery discharge SOC protection value"
-    step: 1
 
 
 switch:
