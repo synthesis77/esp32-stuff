@@ -42,6 +42,63 @@ modbus_controller:
     update_interval: ${update_seconds}
 
 
+# PROTOTYPE SENSORS Anchors/Aliases
+
+# needs random . before name
+# https://community.home-assistant.io/t/how-do-i-label-and-use-anchors/812692/6$0
+.modbus_sensor: &modbus_sensor
+  - platform: modbus_controller
+    modbus_controller_id: modbus_controller_id${id_suffix}
+    id: _need_to_override_this
+    register_type: holding
+    value_type: S_WORD
+    state_class: measurement
+    accuracy_decimals: 0 
+
+.modbus_volts: &modbus_volts
+  - <<: *modbus_sensor
+    device_class: voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1 
+
+.modbus_amps: &modbus_amps
+  - <<: *modbus_sensor
+    device_class: current
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1 
+
+.modbus_watts: &modbus_watts
+  - <<: *modbus_sensor
+    device_class: power
+    unit_of_measurement: "W"
+    # VA override:
+    # device_class: apparent_power
+    # unit_of_measurement: "VA"
+
+.modbus_hz: &modbus_hz
+  - <<: *modbus_sensor
+    device_class: frequency
+    unit_of_measurement: "Hz"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+.modbus_percent: &modbus_percent
+  - <<: *modbus_sensor
+    device_class: battery
+    unit_of_measurement: "%"
+
+.modbus_temp: &modbus_temp
+  - <<: *modbus_sensor
+    device_class: temperature
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1 
+
+
 text_sensor:
   - platform: modbus_controller
     modbus_controller_id: modbus_controller_id${id_suffix}
@@ -70,366 +127,153 @@ text_sensor:
 
 sensor:
   
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_volts
     name: "Mains Voltage${name_suffix}"
     id: Mains_Voltage${id_suffix}
     address: 202
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: voltage
-    unit_of_measurement: "V"
-    accuracy_decimals: 0
-    filters:
-      - multiply: 0.1
+    accuracy_decimals: 0 # still want this?
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_hz
     name: "Mains Frequency${name_suffix}"
     id: Mains_Frequency${id_suffix}
     address: 203
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: frequency
-    unit_of_measurement: "Hz"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.01
-  
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+
+  - <<: *modbus_watts
     name: "Mains Power${name_suffix}"
     id: Mains_Power${id_suffix}
     address: 204
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_volts
     name: "Inverter Voltage${name_suffix}"
     id: Inverter_Voltage${id_suffix}
     address: 205
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: voltage
-    unit_of_measurement: "V"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "Inverter Current${name_suffix}"
     id: Inverter_Current${id_suffix}
     address: 206
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1   
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_hz
     name: "Inverter Frequency${name_suffix}"
     id: Inverter_Frequency${id_suffix}
     address: 207
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: frequency
-    unit_of_measurement: "Hz"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.01
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "Inverter Power${name_suffix}"
     id: Inverter_Power${id_suffix}
     address: 208
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
  
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "Inverter Charging Power${name_suffix}"
     id: Inverter_Charging_Power${id_suffix}
     address: 209
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
 
-  - platform: modbus_controller
+  - <<: *modbus_volts
     modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Voltage${name_suffix}"
     id: Output_Voltage${id_suffix}
     address: 210
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: voltage
-    unit_of_measurement: "V"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "Output Current${name_suffix}"
     id: Output_Current${id_suffix}
     address: 211
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1   
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_hz
     name: "Output Frequency${name_suffix}"
     id: Output_Frequency${id_suffix}
     address: 212
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: frequency
-    unit_of_measurement: "Hz"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.01
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "Output Active Power${name_suffix}"
     id: Output_Active_Power${id_suffix}
     address: 213
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
-    filters:
-      - multiply: 1 
     
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts # actually VA
     name: "Output Apparent Power${name_suffix}"
     id: Output_Apparent_Power${id_suffix}
     address: 214
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
     device_class: apparent_power
     unit_of_measurement: "VA"
-    accuracy_decimals: 0
-    filters:
-      - multiply: 1
 
-  - platform: modbus_controller
+  - <<: *modbus_volts
     modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Voltage${name_suffix}"
     id: Battery_Voltage${id_suffix}
     address: 215
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: voltage
-    unit_of_measurement: "V"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1    
       
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "Battery Current${name_suffix}"
     id: Battery_Current${id_suffix}
     address: 216
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1  
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "Battery Power${name_suffix}"
     id: Battery_Power${id_suffix}
     address: 217
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
     register_count: 2          # address 218 Internal Command
      
-  - platform: modbus_controller
+  - <<: *modbus_volts
     modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Voltage${name_suffix}"
     id: PV_Voltage${id_suffix}
     address: 219
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: voltage
-    unit_of_measurement: "V"
-    accuracy_decimals: 0
-    filters:
-      - multiply: 0.1 
+    accuracy_decimals: 0 # still want this?
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "PV Current${name_suffix}"
     id: PV_Current${id_suffix}
     address: 220
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1 
     register_count: 3     # 221-222 Reserved
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "PV Power${name_suffix}"
     id: PV_Power${id_suffix}
     address: 223
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_watts
     name: "PV Charging Power${name_suffix}"
     id: PV_Charging_Power${id_suffix}
     address: 224
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: power
-    unit_of_measurement: "W"
-    accuracy_decimals: 0
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_percent
     name: "Inverter Load${name_suffix}"
     id: Inverter_Load_Percentage${id_suffix}
     address: 225
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    #device_class: battery
-    unit_of_measurement: "%"
-    accuracy_decimals: 0
-
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+    device_class: "" # leave it as battery?
+  
+  - <<: *modbus_temp
     name: "Temperature DC-DC${name_suffix}"
     id: Temperature_DCDC${id_suffix}
     address: 226
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: temperature
-    unit_of_measurement: "°C"
-    accuracy_decimals: 1 
   
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_temp
     name: "Temperature Inverter${name_suffix}"
     id: Temperature_Inverter${id_suffix}
     address: 227
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: temperature
-    unit_of_measurement: "°C"
-    accuracy_decimals: 1 
     register_count: 2     # 228 Reserved
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_percent
     name: "Battery Percentage${name_suffix}"
     id: Battery_Percentage${id_suffix}
     address: 229
-    register_type: holding
-    value_type: U_WORD
-    state_class: measurement
-    device_class: battery
-    unit_of_measurement: "%"
-    accuracy_decimals: 0 
+    value_type: U_WORD # shouldn't really matter, not getting big enough values
     register_count: 3     # 230 Internal, 231 Reserved
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "Battery Current 232${name_suffix}"
     id: Battery_Current_ID_232${id_suffix}
     address: 232
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "Inverter Charging Current${name_suffix}"
     id: Inverter_Charging_Current${id_suffix}
     address: 233
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1 
 
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+  - <<: *modbus_amps
     name: "PV Charging Current${name_suffix}"
     id: PV_Charging_Current${id_suffix}
     address: 234
-    register_type: holding
-    value_type: S_WORD
-    state_class: measurement
-    device_class: current
-    unit_of_measurement: "A"
-    accuracy_decimals: 1
-    filters:
-      - multiply: 0.1 
 
 # 235-299 reserverd or invalid
 
