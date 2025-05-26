@@ -7,7 +7,7 @@ esp32:
   framework:
     type: arduino
 
-# FIXME  Try Anchors and Aliases from here: https://spacelift.io/blog/yaml$0
+# Anchors and Aliases from here: https://spacelift.io/blog/yaml$0
 # Thanks to this thread!  https://github.com/softwarecrash/Solar2MQTT/discussions/209
 # and this thread:  https://www.reddit.com/r/Esphome/comments/198lze3/looking_for_guidance_how_to_set_up_multiple/$0
 # and this: https://devices.esphome.io/devices/Narada-NPFC$0
@@ -78,9 +78,6 @@ modbus_controller:
   - <<: *modbus_sensor
     device_class: power
     unit_of_measurement: "W"
-    # VA override:
-    # device_class: apparent_power
-    # unit_of_measurement: "VA"
 
 .modbus_hz: &modbus_hz
   - <<: *modbus_sensor
@@ -100,6 +97,12 @@ modbus_controller:
     device_class: temperature
     unit_of_measurement: "°C"
     accuracy_decimals: 1
+
+.modbus_text: &modbus_text
+  - <<: *modbus_entity
+    register_type: holding
+    response_size: 2
+    raw_encode: HEXBYTES
 
 .modbus_writable: &modbus_writable
   - <<: *modbus_entity
@@ -141,12 +144,93 @@ modbus_controller:
 
 
 text_sensor:
-  - platform: modbus_controller
-    modbus_controller_id: modbus_controller_id${id_suffix}
+
+  - <<: *modbus_text
+    name: "Fault Code${name_suffix}"
+    id: Fault_Code${id_suffix}
+    address: 100
+    response_size: 4
+    lambda: |-
+      uint32_t value = modbus_controller::dword_from_hex_str(x, 0);
+      
+      if (value==0) return std::string("None");
+      std::string str = std::string(x);
+      //int bit = 1;
+      //do {
+      //  if (value & 0x1) {
+      //    str += std::string(" ") + switch(bit) {
+      //      case 1: std::string("Over temperature of inverter module"); break;
+      //      default: std::string(bit); break;
+      //    }
+      //  } ++bit;
+      //} while ((value>>=1));
+        
+      if (value & 1<<0)  str.append(", Over temperature of inverter module"); // 1
+      if (value & 1<<1)  str.append(", Over temperature of DCDC module"); // 2
+      if (value & 1<<2)  str.append(", Battery over voltage"); // 3
+      if (value & 1<<3)  str.append(", Over temperature of PV module"); // 4
+      if (value & 1<<4)  str.append(", Output short circuited"); // 5
+      if (value & 1<<5)  str.append(", Over Inverter voltage"); // 6
+      if (value & 1<<6)  str.append(", Output over load"); // 7
+      if (value & 1<<7)  str.append(", Bus over voltage"); // 8
+      if (value & 1<<8)  str.append(", Bus soft start times out"); // 9
+      if (value & 1<<9)  str.append(", PV over current"); // 10
+      if (value & 1<<10) str.append(", PV over voltage"); // 11
+      if (value & 1<<11) str.append(", Battery over current"); // 12
+      if (value & 1<<12) str.append(", Inverter over current"); // 13
+      if (value & 1<<13) str.append(", Bus low voltage"); // 14
+      //if (value & 1<<14) str.append(", Reserve 15"); // 15
+      if (value & 1<<15) str.append(", Inverter DC component is too high"); // 16
+      //if (value & 1<<16) str.append(", Reserve 17"); // 17
+      if (value & 1<<17) str.append(", The zero bias of Output current is too large"); // 18
+      if (value & 1<<18) str.append(", The zero bias of inverter current is too large"); // 19
+      if (value & 1<<19) str.append(", The zero bias of battery current is too large"); // 20
+      if (value & 1<<20) str.append(", The zero bias of PV current is too large"); // 21
+      if (value & 1<<21) str.append(", Inverter low voltage"); // 22
+      if (value & 1<<22) str.append(", Inverter negative power protection"); // 23
+      if (value & 1<<23) str.append(", The host in the parallel system is lost"); // 24
+      if (value & 1<<24) str.append(", Synchronization signal abnormal in the parallel system"); // 25
+      if (value & 1<<25) str.append(", The battery type is incompatible"); // 26
+      if (value & 1<<26) str.append(", Parallel versions are incompatible"); // 27
+      return str;
+  # could replate above "register_count: 2" with 8 to cover gap 103-107
+
+  - <<: *modbus_text
+    name: "Warning Code${name_suffix}"
+    id: Warning_Code${id_suffix}
+    address: 108
+    response_size: 4
+    lambda: |-
+      uint32_t value = modbus_controller::dword_from_hex_str(x, 0);
+      
+      if (value==0) return std::string("None");
+      std::string str = std::string(x);
+      //if (value & 1<<0)  str.append(", Bit 0"); // 1 this bit seems to be always set?
+      if (value & 1<<1)  str.append(", Mains waveform abnormal"); // 1
+      //if (value & 1<<2)  str.append(", Bit 2"); // 2
+      if (value & 1<<3)  str.append(", Mains low voltage"); // 3
+      if (value & 1<<4)  str.append(", Mains over frequency"); // 4
+      if (value & 1<<5)  str.append(", Mains low frequency"); // 5
+      //if (value & 1<<6)  str.append(", PV low voltage"); // 6 //// COMMENTING THIS ERROR OUT SINCE IT'S TERRIBLE AT NIGHT
+      if (value & 1<<7)  str.append(", Over temperature"); // 7
+      if (value & 1<<8)  str.append(", Battery low voltage"); // 8
+      if (value & 1<<9)  str.append(", Battery is not connected"); // 9
+      if (value & 1<<10) str.append(", Overload"); // 10
+      if (value & 1<<11) str.append(", Battery Eq charging"); // 11
+      if (value & 1<<12) str.append(", Battery is discharged at a low voltage and it has not been charged back to the recovery point"); // 12
+      if (value & 1<<13) str.append(", Output power derating"); // 13
+      if (value & 1<<14) str.append(", Fan blocked"); // 14
+      if (value & 1<<15) str.append(", PV energy is too low to be used"); // 15
+      if (value & 1<<16) str.append(", Parallel communication interrupted"); // 16
+      if (value & 1<<17) str.append(", Output mode of Single and Parallel systems is inconsistent"); // 17
+      if (value & 1<<18) str.append(", Battery voltage difference of parallel system is too large"); // 18
+      //if ((value>>19))   str.append(", Bits 19-31"); // 19
+      return str;
+  
+  - <<: *modbus_entity
     name: "Working Mode${name_suffix}"
     id: Working_Mode${id_suffix}
     address: 201
-    entity_category: diagnostic
     register_type: holding
     response_size: 2
     raw_encode: HEXBYTES
@@ -210,7 +294,6 @@ sensor:
     address: 209
 
   - <<: *modbus_volts
-    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Output Voltage${name_suffix}"
     id: Output_Voltage${id_suffix}
     address: 210
@@ -238,7 +321,6 @@ sensor:
     unit_of_measurement: "VA"
 
   - <<: *modbus_volts
-    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "Battery Voltage${name_suffix}"
     id: Battery_Voltage${id_suffix}
     address: 215
@@ -255,7 +337,6 @@ sensor:
     register_count: 2          # address 218 Internal Command
      
   - <<: *modbus_volts
-    modbus_controller_id: modbus_controller_id${id_suffix}
     name: "PV Voltage${name_suffix}"
     id: PV_Voltage${id_suffix}
     address: 219
@@ -320,67 +401,6 @@ sensor:
 
 
 select:
-
-  - <<: *modbus_select
-    name: "Fault Code${name_suffix}"
-    id: Fault_Code${id_suffix}
-    address: 100
-    register_count: 2
-    optionsmap:            #FIXME it's a BITMASK!!!
-      "None": 0
-      "Over temperature of inverter module":  1
-      "Over temperature of DCDC module": 2
-      "Battery over voltage": 3
-      "Over temperature of PV module": 4
-      "Output short circuited": 5
-      "Over Inverter voltage": 6
-      "Output over load": 7
-      "Bus over voltage": 8
-      "Bus soft start times out": 9
-      "PV over current": 10
-      "PV over voltage": 11
-      "Battery over current": 12
-      "Inverter over current": 13
-      "Bus low voltage": 14
-      "Reserve": 15
-      "Inverter DC component is too high": 16
-      "Reserve2": 17
-      "The zero bias of Output current is too large": 18
-      "The zero bias of inverter current is too large": 19
-      "The zero bias of battery current is too large": 20
-      "The zero bias of PV current is too large": 21
-      "Inverter low voltage": 22
-      "Inverter negative power protection": 23
-      "The host in the parallel system is lost": 24
-      "Synchronization signal abnormal in the parallel system": 25
-      "The battery type is incompatible": 26
-      "Parallel versions are incompatible": 27
-  # could replate above "register_count: 2" with 8 to cover gap 103-107
-
-  - <<: *modbus_select
-    name: "Warning Code${name_suffix}"
-    id: Warning_Code${id_suffix}
-    address: 108
-    register_count: 2
-    optionsmap:           #FIXME it's a BITMASK!!!
-      "None": 0
-      "Mains waveform abnormal": 1
-      "Mains low voltage": 3
-      "Mains over frequency": 4
-      "Mains low frequency": 5
-      "PV low voltage": 6
-      "Over temperature": 7
-      "Battery low voltage": 8
-      "Battery is not connected": 9
-      "Overload": 10
-      "Battery Eq charging": 11
-      "Battery is discharged at a low voltage and it has not been charged back to the recovery point": 12
-      "Output power derating": 13
-      "Fan blocked": 14
-      "PV energy is too low to be use": 15
-      "Parallel communication interrupted": 16
-      "Output mode of Single and Parallel systems is inconsistent": 17
-      "Battery voltage difference of parallel system is too large": 18
 
   - <<: *modbus_select
     name: "Output Mode${name_suffix}"
@@ -557,7 +577,7 @@ number:
   - <<: *modbus_number
     name: "Battery Equalization Interval${name_suffix}"
     id: Battery_Equalization_Interval${id_suffix}
-    address: 321
+    address: 337
     device_class: duration
     unit_of_measurement: "d"
     min_value: 1
