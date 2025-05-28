@@ -21,7 +21,7 @@ substitutions:
   uart_id: uart${id_suffix}
   modbus_controller_id: modbus_controller${id_suffix}
   update_seconds: "1s"
-  write_skip: "60"
+  write_skip: "3600"
 
 uart:
   - id: uart_id${id_suffix}
@@ -152,19 +152,10 @@ text_sensor:
     response_size: 4
     lambda: |-
       uint32_t value = modbus_controller::dword_from_hex_str(x, 0);
-      
+      value &= ~(1<<14 | 1<<16);
       if (value==0) return std::string("None");
-      std::string str = std::string(x);
-      //int bit = 1;
-      //do {
-      //  if (value & 0x1) {
-      //    str += std::string(" ") + switch(bit) {
-      //      case 1: std::string("Over temperature of inverter module"); break;
-      //      default: std::string(bit); break;
-      //    }
-      //  } ++bit;
-      //} while ((value>>=1));
-        
+      std::string str = std::to_string(value);
+      
       if (value & 1<<0)  str.append(", Over temperature of inverter module"); // 1
       if (value & 1<<1)  str.append(", Over temperature of DCDC module"); // 2
       if (value & 1<<2)  str.append(", Battery over voltage"); // 3
@@ -202,9 +193,10 @@ text_sensor:
     response_size: 4
     lambda: |-
       uint32_t value = modbus_controller::dword_from_hex_str(x, 0);
-      
+      value &= ~(1<<0 | 1<<2 | 1<<6);
       if (value==0) return std::string("None");
-      std::string str = std::string(x);
+      std::string str = std::to_string(value);
+      
       //if (value & 1<<0)  str.append(", Bit 0"); // 1 this bit seems to be always set?
       if (value & 1<<1)  str.append(", Mains waveform abnormal"); // 1
       //if (value & 1<<2)  str.append(", Bit 2"); // 2

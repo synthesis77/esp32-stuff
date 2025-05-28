@@ -107,6 +107,7 @@ substitutions:
 sensor:
 
   - platform: combination
+    state_class: measurement
     type: median
     name: "${name_prefix}Mains Voltage"
     id: Mains_Voltage
@@ -115,6 +116,7 @@ sensor:
       - source: Mains_Voltage_B
 
   - platform: combination
+    state_class: measurement
     type: median
     name: "${name_prefix}Mains Frequency"
     id: Mains_Frequency
@@ -123,6 +125,7 @@ sensor:
       - source: Mains_Frequency_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Mains Power"
     id: Mains_Power
@@ -131,6 +134,7 @@ sensor:
       - source: Mains_Power_B
 
   - platform: combination
+    state_class: measurement
     type: mean
     name: "${name_prefix}Inverter Voltage"
     id: Inverter_Voltage
@@ -139,6 +143,7 @@ sensor:
       - source: Inverter_Voltage_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Inverter Current"
     id: Inverter_Current
@@ -147,6 +152,7 @@ sensor:
       - source: Inverter_Current_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Inverter Power"
     id: Inverter_Power
@@ -155,6 +161,7 @@ sensor:
       - source: Inverter_Power_B
 
   - platform: combination
+    state_class: measurement
     type: mean
     name: "${name_prefix}Inverter Load"
     id: Inverter_Load_Percentage
@@ -163,6 +170,7 @@ sensor:
       - source: Inverter_Load_Percentage_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Output Active Power"
     id: Output_Active_Power
@@ -171,6 +179,7 @@ sensor:
       - source: Output_Active_Power_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Output Apparent Power"
     id: Output_Apparent_Power
@@ -179,6 +188,7 @@ sensor:
       - source: Output_Apparent_Power_B
 
   - platform: combination
+    state_class: measurement
     type: mean
     name: "${name_prefix}Output Voltage"
     id: Output_Voltage
@@ -187,6 +197,7 @@ sensor:
       - source: Output_Voltage_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Output Current"
     id: Output_Current
@@ -195,6 +206,7 @@ sensor:
       - source: Output_Current_B
   
   - platform: combination
+    state_class: measurement
     type: mean
     name: "${name_prefix}Battery Voltage"
     id: Battery_Voltage
@@ -203,6 +215,7 @@ sensor:
       - source: Battery_Voltage_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Battery Current"
     id: Battery_Current
@@ -211,6 +224,7 @@ sensor:
       - source: Battery_Current_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}Battery Power"
     id: Battery_Power
@@ -219,6 +233,7 @@ sensor:
       - source: Battery_Power_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}PV Power"
     id: PV_Power
@@ -227,6 +242,7 @@ sensor:
       - source: PV_Power_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}PV Charging Power"
     id: PV_Charging_Power
@@ -235,6 +251,7 @@ sensor:
       - source: PV_Charging_Power_B
 
   - platform: combination
+    state_class: measurement
     type: sum
     name: "${name_prefix}PV Charging Current"
     id: PV_Charging_Current
@@ -263,8 +280,3 @@ sensor:
     id: wifi_rssi
     entity_category: "diagnostic"
     update_interval: 60s
-
-# esp32:
-#   board: esp32-c3-devkitm-1
-#   framework:
-#     type: arduino
