@@ -106,6 +106,40 @@ substitutions:
 
 sensor:
 
+  # FIXME use integration and HA state saving https://community.home-assistant.io/t/sensor-integration-reset-doesnt-go-back-to-zero/738774/2
+  - platform: total_daily_energy
+    name: '${name_prefix}Daily Output Energy'
+    id: Daily_Output_Energy
+    power_id: Output_Active_Power
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: '${name_prefix}Daily Battery Energy'
+    id: Daily_Battery_Energy
+    power_id: Battery_Power
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: total_daily_energy
+    name: '${name_prefix}Daily PV Energy'
+    id: Daily_PV_Energy
+    power_id: PV_Power
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
   - platform: combination
     state_class: measurement
     type: median
@@ -280,3 +314,7 @@ sensor:
     id: wifi_rssi
     entity_category: "diagnostic"
     update_interval: 60s
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
