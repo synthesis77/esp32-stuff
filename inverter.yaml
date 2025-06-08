@@ -103,20 +103,53 @@ packages:
 
 substitutions:
   name_prefix: "⭐️ "
+  sensor_name: '${name_prefix}Daily Output Energy'
+  sensor_id: Daily_Output_Energy
+  power_id: Output_Active_Power
+  device_name: "inverter"
 
 sensor:
 
-  # FIXME use integration and HA state saving https://community.home-assistant.io/t/sensor-integration-reset-doesnt-go-back-to-zero/738774/2
+  # - platform: total_daily_energy
+  #   name: '${name_prefix}Daily Output Energy'
+  #   id: Daily_Output_Energy
+  #   power_id: Output_Active_Power
+  #   unit_of_measurement: 'kWh'
+  #   state_class: total_increasing
+  #   device_class: energy
+  #   accuracy_decimals: 3
+  #   filters:
+  #     - multiply: 0.001
+
   - platform: total_daily_energy
-    name: '${name_prefix}Daily Output Energy'
-    id: Daily_Output_Energy
-    power_id: Output_Active_Power
+    name: '${sensor_name}'
+    id: ${sensor_id}
+    power_id: ${power_id}
     unit_of_measurement: 'kWh'
     state_class: total_increasing
     device_class: energy
     accuracy_decimals: 3
+    restore: false
     filters:
       - multiply: 0.001
+      - lambda: |
+          static float restored_value = NAN;
+          if (isnan(restored_value))
+          {
+            restored_value = id(ha_saved_state_${sensor_id}).state; //get_state() for sensors
+            ESP_LOGI("main", "Æ Restored ha_saved_state_${sensor_id} value: %f", restored_value);
+            //return 26000;
+            return restored_value+x;
+          }
+          return x;
+      - filter_out: NAN
+
+  # - platform: homeassistant
+  #   entity_id: "sensor.${device_name}_${sensor_id}" #"sensor.${name}_daily_battery_energy"
+  #   name: "😎 ha_saved_state_${sensor_id}"
+  #   id: ha_saved_state_${sensor_id}
+  #   accuracy_decimals: 3
+  #   internal: false
 
   - platform: total_daily_energy
     name: '${name_prefix}Daily Battery Energy'
@@ -126,6 +159,7 @@ sensor:
     state_class: total_increasing
     device_class: energy
     accuracy_decimals: 3
+    restore: false
     filters:
       - multiply: 0.001
 
@@ -137,9 +171,17 @@ sensor:
     state_class: total_increasing
     device_class: energy
     accuracy_decimals: 3
+    restore: false
     filters:
       - multiply: 0.001
 
+  - platform: homeassistant
+    entity_id: sensor.inverter_daily_battery_energy
+    name: "😎 BATTERY"
+    id: last_usage
+    accuracy_decimals: 3
+    internal: false
+    
   - platform: combination
     state_class: measurement
     type: median
@@ -314,6 +356,13 @@ sensor:
     id: wifi_rssi
     entity_category: "diagnostic"
     update_interval: 60s
+
+number:
+  - platform: homeassistant
+    entity_id: "sensor.${device_name}_${sensor_id}" #"sensor.${name}_daily_battery_energy"
+    name: "😎 ha_saved_state_${sensor_id}"
+    id: ha_saved_state_${sensor_id}
+    internal: false
 
 time:
   - platform: homeassistant
