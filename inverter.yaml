@@ -1,6 +1,9 @@
 esphome:
   name: inverter
   friendly_name: Inverter
+  
+preferences:
+  flash_write_interval: 10min
 
 esp32:
   board: esp32-c3-devkitm-1
@@ -44,45 +47,6 @@ interval:
       - delay: 250ms
       - output.turn_off: led_id
 
-# light:
-#   - platform: status_led
-#     pin:
-#       number: 8
-#       inverted: true
-#     id: led_id
-#     name: "LED"
-
-    # effects:
-    #   - pulse:
-    #       name: "Slow Breathing"
-    #       transition_length: 1s
-    #       update_interval: 1s
-    #       min_brightness: 20%
-    #       max_brightness: 100%
-
-    # optimistic: yes  # Optional: For faster response, especially if using with automations
-
-  # - platform: template
-  #   name: "Blinking LED"
-  #   id: led_blink
-  #   optimistic: yes
-  #   turn_on_action:
-  #     - switch.turn_on: led_switch
-  #     - delay: 500ms
-  #     - switch.turn_off: led_switch
-  #     - delay: 500ms
-  #   turn_off_action:
-  #     - switch.turn_off: led_switch
-
-
-# script:
-#   - id: make_status_breathe
-#     mode: queued
-#     then:
-#       - light.turn_on:
-#         id: led_id
-#         effect: "Slow Breathing"
-
 
 packages:
   # base: !include base-config.yaml
@@ -101,87 +65,53 @@ packages:
       id_suffix: "_B"
       name_suffix: " B"
 
+
+# preferences
+#           global_preferences->sync();
+# https://esphome.io/cookbook/lambda_magic.html
+# https://esphome.io/components/esphome.html#adjusting-flash-writes
+# https://github.com/esphome/esphome/pull/2119
+# https://github.com/esphome/feature-requests/issues/461
+# https://community.home-assistant.io/t/history-services-integration-for-exporting-historical-data/743367
+# https://www.reddit.com/r/Esphome/comments/11pouy0/access_past_values_of_a_sensor_stored_in_ha/
+# https://community.home-assistant.io/t/restore-values-from-home-assistant-after-reboot-doing-it-with-automations-is-there-a-better-way/197068/10
+# https://community.home-assistant.io/t/sensor-integration-reset-doesnt-go-back-to-zero/738774/2
+
+
+# PROTOTYPE SENSORS Anchors/Aliases
+
+.daily_energy: &daily_energy
+  - platform: total_daily_energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    restore: true
+    filters:
+      - multiply: 0.001
+
 substitutions:
   name_prefix: "⭐️ "
-  sensor_name: '${name_prefix}Daily Output Energy'
-  sensor_id: Daily_Output_Energy
-  power_id: Output_Active_Power
-  device_name: "inverter"
+
 
 sensor:
 
-  # - platform: total_daily_energy
-  #   name: '${name_prefix}Daily Output Energy'
-  #   id: Daily_Output_Energy
-  #   power_id: Output_Active_Power
-  #   unit_of_measurement: 'kWh'
-  #   state_class: total_increasing
-  #   device_class: energy
-  #   accuracy_decimals: 3
-  #   filters:
-  #     - multiply: 0.001
+  - <<: *daily_energy
+    name: '${name_prefix}Daily Output Energy'
+    id: Daily_Output_Energy
+    power_id: Output_Active_Power
 
-  - platform: total_daily_energy
-    name: '${sensor_name}'
-    id: ${sensor_id}
-    power_id: ${power_id}
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    restore: false
-    filters:
-      - multiply: 0.001
-      - lambda: |
-          static float restored_value = NAN;
-          if (isnan(restored_value))
-          {
-            restored_value = id(ha_saved_state_${sensor_id}).state; //get_state() for sensors
-            ESP_LOGI("main", "Æ Restored ha_saved_state_${sensor_id} value: %f", restored_value);
-            //return 26000;
-            return restored_value+x;
-          }
-          return x;
-      - filter_out: NAN
-
-  # - platform: homeassistant
-  #   entity_id: "sensor.${device_name}_${sensor_id}" #"sensor.${name}_daily_battery_energy"
-  #   name: "😎 ha_saved_state_${sensor_id}"
-  #   id: ha_saved_state_${sensor_id}
-  #   accuracy_decimals: 3
-  #   internal: false
-
-  - platform: total_daily_energy
+  - <<: *daily_energy
     name: '${name_prefix}Daily Battery Energy'
     id: Daily_Battery_Energy
     power_id: Battery_Power
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    restore: false
-    filters:
-      - multiply: 0.001
 
-  - platform: total_daily_energy
+  - <<: *daily_energy
     name: '${name_prefix}Daily PV Energy'
     id: Daily_PV_Energy
     power_id: PV_Power
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    restore: false
-    filters:
-      - multiply: 0.001
 
-  - platform: homeassistant
-    entity_id: sensor.inverter_daily_battery_energy
-    name: "😎 BATTERY"
-    id: last_usage
-    accuracy_decimals: 3
-    internal: false
-    
+
   - platform: combination
     state_class: measurement
     type: median
@@ -351,18 +281,19 @@ sensor:
     entity_category: "diagnostic"
     device_class: duration
     update_interval: 1s
+
   - platform: wifi_signal
     name: "RSSI"
     id: wifi_rssi
     entity_category: "diagnostic"
     update_interval: 60s
 
-number:
-  - platform: homeassistant
-    entity_id: "sensor.${device_name}_${sensor_id}" #"sensor.${name}_daily_battery_energy"
-    name: "😎 ha_saved_state_${sensor_id}"
-    id: ha_saved_state_${sensor_id}
-    internal: false
+  - platform: internal_temperature
+    name: "ESP Temperature"
+    id: esp_temperature
+    entity_category: "diagnostic"
+    device_class: temperature
+    unit_of_measurement: "°C"
 
 time:
   - platform: homeassistant
