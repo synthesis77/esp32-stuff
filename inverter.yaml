@@ -28,11 +28,14 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Inverter Fallback Hotspot"
+    ssid: "${friendly_name} Setup"
     password: !secret inverter_ap_password
-  
+
 captive_portal:
-  
+
+
+# LED BLINKING
+
 output:
   - platform: gpio
     pin:
@@ -48,6 +51,27 @@ interval:
       - output.turn_off: led_id
 
 
+# INTERDEVICE COMMUNICATION
+
+udp:
+  
+packet_transport:
+  - platform: udp
+    encryption: !secret inverter_udp_key
+    update_interval: 1s
+    sensors:
+      # - id: Output_Active_Power   # enable for TRANSMIT
+
+
+# PACKAGES
+
+substitutions:
+  name_prefix: "⭐️ "
+  inverter1_suffix: "_A"
+  inverter2_suffix: "_B"
+  inverter1_name_suffix: " A"
+  inverter2_name_suffix: " B"
+
 packages:
   # base: !include base-config.yaml
   inverter1: !include
@@ -55,15 +79,15 @@ packages:
     vars:
       tx_pin: GPIO21
       rx_pin: GPIO20
-      id_suffix: "_A"
-      name_suffix: " A"
+      id_suffix: ${inverter1_suffix}
+      name_suffix: ${inverter1_name_suffix}
   inverter2: !include
     file: single-pow-hvm62k-48v-lip.yaml
     vars:
       tx_pin: GPIO10
       rx_pin: GPIO9
-      id_suffix: "_B"
-      name_suffix: " B"
+      id_suffix: ${inverter2_suffix}
+      name_suffix:  ${inverter2_name_suffix}
 
 
 # preferences
@@ -90,11 +114,11 @@ packages:
     filters:
       - multiply: 0.001
 
-substitutions:
-  name_prefix: "⭐️ "
 
-
+# SENSORS
 sensor:
+
+# INTEGRATING ENERGY SENSORS
 
   - <<: *daily_energy
     name: '${name_prefix}Daily Output Energy'
@@ -112,14 +136,23 @@ sensor:
     power_id: PV_Power
 
 
+# REMOTE SENSORS
+  - platform: packet_transport
+    provider: inverter
+    id: Output_Active_Power_External
+    remote_id: Output_Active_Power   # enable for RECEIVE
+
+
+# COMBINATION SENSORS from connected inverters
+
   - platform: combination
     state_class: measurement
     type: median
     name: "${name_prefix}Mains Voltage"
     id: Mains_Voltage
     sources:
-      - source: Mains_Voltage_A
-      - source: Mains_Voltage_B
+      - source: 'Mains_Voltage${inverter1_suffix}'
+      - source: 'Mains_Voltage${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -127,8 +160,8 @@ sensor:
     name: "${name_prefix}Mains Frequency"
     id: Mains_Frequency
     sources:
-      - source: Mains_Frequency_A
-      - source: Mains_Frequency_B
+      - source: 'Mains_Frequency${inverter1_suffix}'
+      - source: 'Mains_Frequency${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -136,8 +169,8 @@ sensor:
     name: "${name_prefix}Mains Power"
     id: Mains_Power
     sources:
-      - source: Mains_Power_A
-      - source: Mains_Power_B
+      - source: 'Mains_Power${inverter1_suffix}'
+      - source: 'Mains_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -145,8 +178,8 @@ sensor:
     name: "${name_prefix}Inverter Voltage"
     id: Inverter_Voltage
     sources:
-      - source: Inverter_Voltage_A
-      - source: Inverter_Voltage_B
+      - source: 'Inverter_Voltage${inverter1_suffix}'
+      - source: 'Inverter_Voltage${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -154,8 +187,8 @@ sensor:
     name: "${name_prefix}Inverter Current"
     id: Inverter_Current
     sources:
-      - source: Inverter_Current_A
-      - source: Inverter_Current_B
+      - source: 'Inverter_Current${inverter1_suffix}'
+      - source: 'Inverter_Current${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -163,8 +196,8 @@ sensor:
     name: "${name_prefix}Inverter Power"
     id: Inverter_Power
     sources:
-      - source: Inverter_Power_A
-      - source: Inverter_Power_B
+      - source: 'Inverter_Power${inverter1_suffix}'
+      - source: 'Inverter_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -172,8 +205,8 @@ sensor:
     name: "${name_prefix}Inverter Load"
     id: Inverter_Load_Percentage
     sources:
-      - source: Inverter_Load_Percentage_A
-      - source: Inverter_Load_Percentage_B
+      - source: 'Inverter_Load_Percentage${inverter1_suffix}'
+      - source: 'Inverter_Load_Percentage${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -181,8 +214,9 @@ sensor:
     name: "${name_prefix}Output Active Power"
     id: Output_Active_Power
     sources:
-      - source: Output_Active_Power_A
-      - source: Output_Active_Power_B
+      - source: 'Output_Active_Power${inverter1_suffix}'
+      - source: 'Output_Active_Power${inverter2_suffix}'
+      - source: Output_Active_Power_External
 
   - platform: combination
     state_class: measurement
@@ -190,8 +224,8 @@ sensor:
     name: "${name_prefix}Output Apparent Power"
     id: Output_Apparent_Power
     sources:
-      - source: Output_Apparent_Power_A
-      - source: Output_Apparent_Power_B
+      - source: 'Output_Apparent_Power${inverter1_suffix}'
+      - source: 'Output_Apparent_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -199,8 +233,8 @@ sensor:
     name: "${name_prefix}Output Voltage"
     id: Output_Voltage
     sources:
-      - source: Output_Voltage_A
-      - source: Output_Voltage_B
+      - source: 'Output_Voltage${inverter1_suffix}'
+      - source: 'Output_Voltage${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -208,8 +242,8 @@ sensor:
     name: "${name_prefix}Output Current"
     id: Output_Current
     sources:
-      - source: Output_Current_A
-      - source: Output_Current_B
+      - source: 'Output_Current${inverter1_suffix}'
+      - source: 'Output_Current${inverter2_suffix}'
   
   - platform: combination
     state_class: measurement
@@ -217,8 +251,8 @@ sensor:
     name: "${name_prefix}Battery Voltage"
     id: Battery_Voltage
     sources:
-      - source: Battery_Voltage_A
-      - source: Battery_Voltage_B
+      - source: 'Battery_Voltage${inverter1_suffix}'
+      - source: 'Battery_Voltage${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -226,8 +260,8 @@ sensor:
     name: "${name_prefix}Battery Current"
     id: Battery_Current
     sources:
-      - source: Battery_Current_A
-      - source: Battery_Current_B
+      - source: 'Battery_Current${inverter1_suffix}'
+      - source: 'Battery_Current${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -235,8 +269,8 @@ sensor:
     name: "${name_prefix}Battery Power"
     id: Battery_Power
     sources:
-      - source: Battery_Power_A
-      - source: Battery_Power_B
+      - source: 'Battery_Power${inverter1_suffix}'
+      - source: 'Battery_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -244,8 +278,8 @@ sensor:
     name: "${name_prefix}PV Power"
     id: PV_Power
     sources:
-      - source: PV_Power_A
-      - source: PV_Power_B
+      - source: 'PV_Power${inverter1_suffix}'
+      - source: 'PV_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -253,8 +287,8 @@ sensor:
     name: "${name_prefix}PV Charging Power"
     id: PV_Charging_Power
     sources:
-      - source: PV_Charging_Power_A
-      - source: PV_Charging_Power_B
+      - source: 'PV_Charging_Power${inverter1_suffix}'
+      - source: 'PV_Charging_Power${inverter2_suffix}'
 
   - platform: combination
     state_class: measurement
@@ -262,16 +296,16 @@ sensor:
     name: "${name_prefix}PV Charging Current"
     id: PV_Charging_Current
     sources:
-      - source: PV_Charging_Current_A
-      - source: PV_Charging_Current_B
+      - source: 'PV_Charging_Current${inverter1_suffix}'
+      - source: 'PV_Charging_Current${inverter2_suffix}'
 
   # - platform: combination
   #   type: sum
   #   name: "${name_prefix}NAME"
   #   id: ID
   #   sources:
-  #     - source: ID_A
-  #     - source: ID_B
+  #     - source: 'ID${inverter1_suffix}'
+  #     - source: 'ID${inverter2_suffix}'
 
     
 # sensor:
