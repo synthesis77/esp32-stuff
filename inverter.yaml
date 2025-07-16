@@ -61,6 +61,26 @@ packet_transport:
     update_interval: 1s
     sensors:
       # - id: Output_Active_Power   # enable for TRANSMIT
+      # - id: Mains_Voltage
+      # - id: Mains_Frequency
+      # - id: Mains_Power
+      # - id: Inverter_Voltage
+      # - id: Inverter_Current
+      # - id: Inverter_Power
+      # - id: Inverter_Load_Percentage
+      # - id: Output_Active_Power
+      # - id: Output_Apparent_Power
+      # - id: Output_Voltage
+      # - id: Output_Current
+      # - id: Battery_Voltage
+      # - id: Battery_Current
+      # - id: Battery_Power
+      # - id: PV_Power
+      # - id: PV_Charging_Power
+      # - id: PV_Charging_Current
+    providers:
+    - name: inverter2
+      encryption: !secret inverter_udp_key
 
 
 # PACKAGES
@@ -114,6 +134,9 @@ packages:
     filters:
       - multiply: 0.001
 
+.remote_sensor: &remote_sensor
+  - platform: packet_transport
+    provider: inverter2
 
 # SENSORS
 sensor:
@@ -136,13 +159,6 @@ sensor:
     power_id: PV_Power
 
 
-# REMOTE SENSORS
-  - platform: packet_transport
-    provider: inverter
-    id: Output_Active_Power_External
-    remote_id: Output_Active_Power   # enable for RECEIVE
-
-
 # COMBINATION SENSORS from connected inverters
 
   - platform: combination
@@ -153,6 +169,10 @@ sensor:
     sources:
       - source: 'Mains_Voltage${inverter1_suffix}'
       - source: 'Mains_Voltage${inverter2_suffix}'
+      - source: Mains_Voltage_External
+  - <<: *remote_sensor
+    id: Mains_Voltage_External
+    remote_id: Mains_Voltage
 
   - platform: combination
     state_class: measurement
@@ -162,6 +182,10 @@ sensor:
     sources:
       - source: 'Mains_Frequency${inverter1_suffix}'
       - source: 'Mains_Frequency${inverter2_suffix}'
+      - source: Mains_Frequency_External
+  - <<: *remote_sensor
+    id: Mains_Frequency_External
+    remote_id: Mains_Frequency
 
   - platform: combination
     state_class: measurement
@@ -171,6 +195,10 @@ sensor:
     sources:
       - source: 'Mains_Power${inverter1_suffix}'
       - source: 'Mains_Power${inverter2_suffix}'
+      - source: Mains_Power_External
+  - <<: *remote_sensor
+    id: Mains_Power_External
+    remote_id: Mains_Power
 
   - platform: combination
     state_class: measurement
@@ -180,6 +208,10 @@ sensor:
     sources:
       - source: 'Inverter_Voltage${inverter1_suffix}'
       - source: 'Inverter_Voltage${inverter2_suffix}'
+      - source: Inverter_Voltage_External
+  - <<: *remote_sensor
+    id: Inverter_Voltage_External
+    remote_id: Inverter_Voltage
 
   - platform: combination
     state_class: measurement
@@ -189,6 +221,10 @@ sensor:
     sources:
       - source: 'Inverter_Current${inverter1_suffix}'
       - source: 'Inverter_Current${inverter2_suffix}'
+      - source: Inverter_Current_External
+  - <<: *remote_sensor
+    id: Inverter_Current_External
+    remote_id: Inverter_Current
 
   - platform: combination
     state_class: measurement
@@ -198,6 +234,10 @@ sensor:
     sources:
       - source: 'Inverter_Power${inverter1_suffix}'
       - source: 'Inverter_Power${inverter2_suffix}'
+      - source: Inverter_Power_External
+  - <<: *remote_sensor
+    id: Inverter_Power_External
+    remote_id: Inverter_Power
 
   - platform: combination
     state_class: measurement
@@ -207,6 +247,10 @@ sensor:
     sources:
       - source: 'Inverter_Load_Percentage${inverter1_suffix}'
       - source: 'Inverter_Load_Percentage${inverter2_suffix}'
+      - source: Inverter_Load_Percentage_External
+  - <<: *remote_sensor
+    id: Inverter_Load_Percentage_External
+    remote_id: Inverter_Load_Percentage
 
   - platform: combination
     state_class: measurement
@@ -217,6 +261,9 @@ sensor:
       - source: 'Output_Active_Power${inverter1_suffix}'
       - source: 'Output_Active_Power${inverter2_suffix}'
       - source: Output_Active_Power_External
+  - <<: *remote_sensor
+    id: Output_Active_Power_External
+    remote_id: Output_Active_Power
 
   - platform: combination
     state_class: measurement
@@ -226,6 +273,10 @@ sensor:
     sources:
       - source: 'Output_Apparent_Power${inverter1_suffix}'
       - source: 'Output_Apparent_Power${inverter2_suffix}'
+      - source: Output_Apparent_Power_External
+  - <<: *remote_sensor
+    id: Output_Apparent_Power_External
+    remote_id: Output_Apparent_Power
 
   - platform: combination
     state_class: measurement
@@ -235,6 +286,10 @@ sensor:
     sources:
       - source: 'Output_Voltage${inverter1_suffix}'
       - source: 'Output_Voltage${inverter2_suffix}'
+      - source: Output_Voltage_External
+  - <<: *remote_sensor
+    id: Output_Voltage_External
+    remote_id: Output_Voltage
 
   - platform: combination
     state_class: measurement
@@ -244,7 +299,11 @@ sensor:
     sources:
       - source: 'Output_Current${inverter1_suffix}'
       - source: 'Output_Current${inverter2_suffix}'
-  
+      - source: Output_Current_External
+  - <<: *remote_sensor
+    id: Output_Current_External
+    remote_id: Output_Current
+
   - platform: combination
     state_class: measurement
     type: mean
@@ -253,6 +312,10 @@ sensor:
     sources:
       - source: 'Battery_Voltage${inverter1_suffix}'
       - source: 'Battery_Voltage${inverter2_suffix}'
+      - source: Battery_Voltage_External
+  - <<: *remote_sensor
+    id: Battery_Voltage_External
+    remote_id: Battery_Voltage
 
   - platform: combination
     state_class: measurement
@@ -262,6 +325,10 @@ sensor:
     sources:
       - source: 'Battery_Current${inverter1_suffix}'
       - source: 'Battery_Current${inverter2_suffix}'
+      - source: Battery_Current_External
+  - <<: *remote_sensor
+    id: Battery_Current_External
+    remote_id: Battery_Current
 
   - platform: combination
     state_class: measurement
@@ -271,6 +338,10 @@ sensor:
     sources:
       - source: 'Battery_Power${inverter1_suffix}'
       - source: 'Battery_Power${inverter2_suffix}'
+      - source: Battery_Power_External
+  - <<: *remote_sensor
+    id: Battery_Power_External
+    remote_id: Battery_Power
 
   - platform: combination
     state_class: measurement
@@ -280,6 +351,10 @@ sensor:
     sources:
       - source: 'PV_Power${inverter1_suffix}'
       - source: 'PV_Power${inverter2_suffix}'
+      - source: PV_Power_External
+  - <<: *remote_sensor
+    id: PV_Power_External
+    remote_id: PV_Power
 
   - platform: combination
     state_class: measurement
@@ -289,6 +364,10 @@ sensor:
     sources:
       - source: 'PV_Charging_Power${inverter1_suffix}'
       - source: 'PV_Charging_Power${inverter2_suffix}'
+      - source: PV_Charging_Power_External
+  - <<: *remote_sensor
+    id: PV_Charging_Power_External
+    remote_id: PV_Charging_Power
 
   - platform: combination
     state_class: measurement
@@ -298,6 +377,10 @@ sensor:
     sources:
       - source: 'PV_Charging_Current${inverter1_suffix}'
       - source: 'PV_Charging_Current${inverter2_suffix}'
+      - source: PV_Charging_Current_External
+  - <<: *remote_sensor
+    id: PV_Charging_Current_External
+    remote_id: PV_Charging_Current
 
   # - platform: combination
   #   type: sum
@@ -306,6 +389,10 @@ sensor:
   #   sources:
   #     - source: 'ID${inverter1_suffix}'
   #     - source: 'ID${inverter2_suffix}'
+  #    - source: _External
+  #- <<: *remote_sensor
+  #  id: _External
+  #  remote_id:
 
     
 # sensor:
