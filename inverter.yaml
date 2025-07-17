@@ -94,6 +94,23 @@ substitutions:
 
 packages:
   # base: !include base-config.yaml
+  
+#  remote_package_files2:
+#  url: https://github.com/synthesis77/esp32-stuff
+#  files:
+#    - path: single-pow-hvm62k-48v-lip.yaml
+#      vars:
+#        tx_pin: GPIO21
+#        rx_pin: GPIO20
+#        id_suffix: ${inverter1_suffix}
+#        name_suffix: ${inverter1_name_suffix}
+#    - path: single-pow-hvm62k-48v-lip.yaml
+#      vars:
+#        tx_pin: GPIO10
+#        rx_pin: GPIO9
+#        id_suffix: ${inverter2_suffix}
+#        name_suffix:  ${inverter2_name_suffix}
+
   inverter1: !include
     file: single-pow-hvm62k-48v-lip.yaml
     vars:
