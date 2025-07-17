@@ -12,6 +12,15 @@ esp32:
 
 # Enable logging
 logger:
+  level: VERBOSE # VERY_VERBOSE
+  initial_level: DEBUG
+  baud_rate: 0
+
+select:
+    - platform: logger
+      name: "Logger select"
+      icon: "mdi:format-font"
+
 
 # Enable Home Assistant API
 api:
